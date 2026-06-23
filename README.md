@@ -3,6 +3,8 @@
 **Contribution Number:** 1  
 **Student:** Sai Subhash Manam  
 **Issue:** https://github.com/orthogonalhq/nous-core/issues/314  
+**Pull Request:** https://github.com/orthogonalhq/nous-core/pull/411  
+**Branch:** https://github.com/saisubhash9/nous-core/tree/feat/314-perplexity-adapter  
 **Status:** Phase III [Week 3 — Implementation Complete, PR Submitted]
 
 ---
@@ -147,7 +149,7 @@ Pending a real Perplexity API key. The shared chat-completions provider (which P
 - Confirmed **zero core/bootstrap/runtime edits**: the runtime resolves `PERPLEXITY_API_KEY` from `auth.envVar` and the endpoint from `defaultEndpoint` automatically.
 - Final verification: `check:generated` ✅, `typecheck` ✅, full package suite **315 passed | 2 skipped**.
 - CI initially failed on a type error in the new test (reading optional discovery fields off the narrowed `as const` leaf type); fixed by widening to `ProviderDefinitionLeaf` for those assertions, then re-pushed.
-- Opened the PR against the integration branch with a detailed writeup, including the structural edge flagged below.
+- Opened **PR [#411](https://github.com/orthogonalhq/nous-core/pull/411)** against the integration branch with a detailed writeup, including the structural edge flagged below.
 
 ### Structural Edge Flagged to Maintainer
 
