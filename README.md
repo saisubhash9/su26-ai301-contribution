@@ -7,6 +7,13 @@
 **Branch:** https://github.com/saisubhash9/nous-core/tree/feat/314-perplexity-adapter  
 **Status:** Phase IV [Complete — Merged ✅]
 
+> **Note on PR base branch:** This PR targets the upstream integration branch
+> `feat/contributor-friendly-inference-provider-surface` on `orthogonalhq/nous-core`,
+> **not** `main`. The maintainer explicitly required Cloud API provider adapters to
+> stack against that integration branch (not `dev`/`main`) until the provider-surface
+> work is fully integrated. It is a real PR against the upstream repository (not a
+> draft against my fork) and has been **merged**.
+
 ---
 
 ## Why I Chose This Issue
@@ -125,7 +132,38 @@ Create a new provider leaf at `self/subcortex/providers/src/providers/perplexity
 - [x] Codegen freshness + public-export + provider-pipeline integration tests pass with the new vendor (alongside the other vendors that landed on the integration branch).
 - [ ] Live `invoke()`/`stream()` against the real Perplexity API — pending a provisioned `PERPLEXITY_API_KEY`. (Streaming behavior is already exercised generically by the shared `ChatCompletionsProvider` suite.)
 
-**Result:** `377 passed | 2 skipped` across the providers package, including a dedicated `perplexity-provider.test.ts` (13 tests) and a default/override path regression test added to the shared chat-completions suite. `check:generated` and `typecheck` both clean.
+### Test Evidence (before/after)
+
+**Before** — no Perplexity leaf exists:
+
+```
+$ ls self/subcortex/providers/src/providers/
+anthropic  codex-cli  github-copilot-cli  groq  llama-cpp  ollama  openai
+# → no `perplexity/` directory
+```
+
+**After** — leaf added, catalogs regenerated, full suite green:
+
+```
+$ pnpm --filter @nous/subcortex-providers run check:generated
+> node scripts/generate-provider-aggregates.mjs --check
+# (exit 0 — generated catalogs are fresh)
+
+$ pnpm --filter @nous/subcortex-providers run typecheck
+# TYPECHECK EXIT: 0  (no TS errors)
+
+$ pnpm --filter @nous/subcortex-providers exec vitest run --config vitest.config.ts
+ Test Files  27 passed | 1 skipped (28)
+      Tests  377 passed | 2 skipped (379)
+```
+
+Targeted proof of the endpoint fix (mocked `fetch`):
+
+```
+✓ Perplexity request URL composition > calls Perplexity at /chat/completions (no /v1 prefix)
+    → fetch called with 'https://api.perplexity.ai/chat/completions'
+✓ Perplexity factory fails closed > throws instead of falling back to OPENAI_API_KEY
+```
 
 ### Manual Testing
 
@@ -161,7 +199,7 @@ Real obstacles hit during this contribution and how each was resolved:
 - Read `.architecture` and the provider-adapter docs to understand "certified provider leaves," the generated-catalog workflow, and the testing checklist.
 - Established the file-structure blueprint, choosing the OpenAI-compatible (chat-completions) path over a custom protocol.
 
-### Week 3 Progress (Implementation & PR)
+### Week 3 Progress — Implementation & PR (2026-06-22)
 
 - Synced the working branch to the tip of the integration branch (`feat/contributor-friendly-inference-provider-surface`) — the maintainer's required PR target for Cloud API adapters (explicitly **not** `dev`).
 - Built the 4-file Perplexity leaf (`definition.ts`, `provider.ts`, `adapter.ts`, `index.ts`) reusing the `openai-api` protocol; regenerated the three provider catalogs via `pnpm generate:providers` (never hand-edited).
@@ -171,9 +209,9 @@ Real obstacles hit during this contribution and how each was resolved:
 - CI initially failed on a type error in the new test (reading optional discovery fields off the narrowed `as const` leaf type); fixed by widening to `ProviderDefinitionLeaf` for those assertions, then re-pushed.
 - Opened **PR [#411](https://github.com/orthogonalhq/nous-core/pull/411)** against the integration branch with a detailed writeup.
 
-### Week 4 Progress (Maintainer Review Round 1 — Addressed & Re-submitted)
+### Week 4 Progress — Maintainer Review Round 1 (2026-06-28)
 
-The maintainer reviewed the PR as an early-access provider integration and requested three changes before merge. All addressed and force-pushed:
+The maintainer reviewed the PR as an early-access provider integration and requested three changes before merge. All addressed and force-pushed (branch commit `45c906fd`):
 
 **1. Endpoint/path composition — confirmed wrong, fixed.**
 The maintainer suspected the composed URL was off. I verified against [Perplexity's API reference](https://docs.perplexity.ai/api-reference/chat-completions-post) and [Spring AI](https://docs.spring.io/spring-ai/reference/api/chat/perplexity-chat.html): Perplexity's OpenAI-compatible endpoint is **`https://api.perplexity.ai/chat/completions` — no `/v1`**. The shared `ChatCompletionsProvider` hardcoded `/v1/chat/completions`, which would have produced a 404. Rather than hardcode a special case, I made the completions path **configurable** (`completionsPath` option, default `/v1/chat/completions` so OpenAI/groq/llama-cpp are unchanged), and the Perplexity leaf passes `/chat/completions`. Added a mocked-fetch test asserting the exact request URL, plus a default/override regression test on the shared provider. This is the useful signal for the provider-surface cleanup tracked in **#413**.
@@ -188,7 +226,7 @@ The PR was carrying `docs/app/**` and `docs/lib/layout.shared.tsx` changes that 
 
 **Re-verification:** `check:generated` ✅, `typecheck` ✅, suite **377 passed | 2 skipped** (now includes 13 Perplexity tests). Force-pushed the cleaned branch and replied on the PR mapping each review point to its fix.
 
-### Week 5 Progress (Merged ✅)
+### Week 5 Progress — Merged (2026-07-05) ✅
 
 - The maintainer **merged the PR as the initial early-access Perplexity Sonar provider leaf.**
 - Confirmed all three requested PR-local changes were accepted: Perplexity uses `/chat/completions`, fails closed instead of falling back to `OPENAI_API_KEY`, and the unrelated docs-app changes were removed.
@@ -200,7 +238,7 @@ The PR was carrying `docs/app/**` and `docs/lib/layout.shared.tsx` changes that 
 
 - **New files (leaf):** `providers/perplexity/{definition,provider,adapter,index}.ts` and `__tests__/perplexity-provider.test.ts`.
 - **Modified:** `protocols/openai-api/provider.ts` (backward-compatible `completionsPath`); regenerated catalogs `provider-{definitions,adapters,factories}.ts`; roster tests `adapter-resolver.test.ts`, `provider-codegen.test.ts`, `provider-definitions/provider-definition-types.test.ts`, `provider-definitions/provider-definitions.test.ts`, `provider-pipeline-integration.test.ts`; and a default/override path test in `chat-completions-provider.test.ts`.
-- **Key commit:** `feat(providers): add Perplexity (Sonar) certified provider leaf` (review fixes folded in on rebase), merged via PR #411.
+- **Key commits:** `45c906fd` — `feat(providers): add Perplexity (Sonar) certified provider leaf` (review fixes folded in on rebase). Merged via PR #411 (upstream merge commit: `<fill-from-PR-page>`).
 - **Approach decisions:** reuse the shared `chat-completions` protocol instead of a custom implementation; keep the leaf metadata-only with a derived provider id; make the path configurable rather than special-casing Perplexity; fail closed on credentials; keep the diff provider-leaf-only.
 
 ---
@@ -208,13 +246,22 @@ The PR was carrying `docs/app/**` and `docs/lib/layout.shared.tsx` changes that 
 ## Pull Request
 
 **PR Link:** https://github.com/orthogonalhq/nous-core/pull/411
+**Base branch:** `feat/contributor-friendly-inference-provider-surface` (upstream integration branch — the maintainer's required target for Cloud API adapters; see the note at the top of this README).
 
-**PR Description:** Adds an OpenAI Chat Completions–compatible Perplexity (Sonar) certified provider leaf reusing the shared `chat-completions` protocol; regenerates the provider catalogs; extends the vendor-roster tests. Definition-driven with no bootstrap/runtime/`@nous/shared` changes. Closes #314.
+**PR Description (summary):** Adds an OpenAI Chat Completions–compatible Perplexity (Sonar) certified provider leaf reusing the shared `chat-completions` protocol; regenerates the provider catalogs; extends the vendor-roster tests. Definition-driven with no bootstrap/runtime/`@nous/shared` changes. **Closes #314.**
 
-**Maintainer Feedback:**
-- **Week 4 — Review Round 1:** Requested three changes before merge — (1) verify/correct the endpoint path (`/v1/chat/completions` vs Perplexity's `/chat/completions`), (2) prevent fallback to `OPENAI_API_KEY`, (3) remove unrelated docs-app changes. Also noted two non-blocking follow-ups: `nativeToolUse` handling (#390) and the broader protocol/adapter capability-source cleanup (#413).
-- **Week 4 — My response:** Addressed all three (configurable `completionsPath` + URL test; fail-closed factory + test; rebased to drop docs churn), re-verified, force-pushed, and posted a comment mapping each point to its fix.
-- **Week 5 — Merge:** Maintainer merged it as the initial early-access Perplexity Sonar provider leaf, confirming the requested changes were addressed and that the shared path override preserves the OpenAI default. Residual generated-catalog/roster conflicts from parallel provider leaves were resolved maintainer-side (tracked by #414).
+**Acceptance Criteria Checklist:**
+- [x] Tests added (`perplexity-provider.test.ts`, 13 tests) + shared-provider path regression test.
+- [x] All tests passing (`377 passed | 2 skipped`).
+- [x] `typecheck` clean (exit 0) and generated catalogs fresh (`check:generated`).
+- [x] Follows project style / provider-leaf docs (certified leaf shape, no hand-authored `wellKnownProviderId`, generated catalogs not hand-edited).
+- [x] No breaking changes — the shared `completionsPath` default preserves OpenAI's `/v1/chat/completions` behavior; change is additive/backward-compatible.
+- [x] References the issue with `Closes #314`.
+
+**Maintainer Feedback log:**
+- **2026-06-28 — Review Round 1 (maintainer):** Requested three changes before merge — (1) verify/correct the endpoint path (`/v1/chat/completions` vs Perplexity's `/chat/completions`), (2) prevent fallback to `OPENAI_API_KEY`, (3) remove unrelated docs-app changes. Non-blocking follow-ups noted: `nativeToolUse` handling (#390) and the broader protocol/adapter capability-source cleanup (#413).
+- **2026-06-28 — My response (commit `45c906fd`):** Addressed all three — configurable `completionsPath` + URL test; fail-closed factory + test; rebased onto the integration tip to drop docs churn and reconcile with the newly-landed groq/github-copilot-cli/llama-cpp leaves. Re-verified (`377 passed | 2 skipped`), force-pushed, and commented on the PR mapping each point to its fix.
+- **2026-07-05 — Merge (maintainer):** Merged as the initial early-access Perplexity Sonar provider leaf; confirmed the requested changes were addressed and that the shared path override preserves the OpenAI default. Residual generated-catalog/roster conflicts from parallel provider leaves were resolved maintainer-side (tracked by #414). *(Upstream merge commit: `<fill-from-PR-page>`.)*
 
 **Status:** **Merged ✅**
 
@@ -239,6 +286,8 @@ See the **Challenges Faced** section above — the most instructive were the Nod
 - Run the package **`typecheck`** (not just Vitest) before every push — Vitest transpiles without type-checking, which let a `tsc`-only error reach CI.
 - Branch off the **clean integration tip** from day one to avoid inheriting unrelated merge/docs churn.
 - **Verify third-party API specifics early** (endpoint path, auth header, model IDs) rather than assuming an "OpenAI-compatible" API is byte-for-byte identical — the `/v1` path difference was the key example.
+
+**Teachable insight for future cohorts:** "OpenAI-compatible" does not mean "OpenAI-identical." Reusing a shared protocol client is the right instinct, but always verify the *path*, *auth header scheme*, and *credential-fallback behavior* for the new vendor — and prefer making the shared client configurable over special-casing. A silent `OPENAI_API_KEY` fallback in a shared client is a real cross-vendor credential-leak footgun; new provider factories should **fail closed**.
 
 ---
 
