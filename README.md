@@ -1,3 +1,164 @@
+# Contribution 4: docs(docs): remove stale scratch checklist from top of TODO.md
+
+**Contribution Number:** 4  
+**Student:** Sai Subhash Manam  
+**Issue:** https://github.com/Maki-Zeninn/stellar-router/issues/923  
+**Status:** Phase III [Complete — PR Submitted, Awaiting Review]
+
+---
+
+## Why I Chose This Issue
+
+After my `nous-core` provider-adapter work, I wanted a clean, self-contained documentation fix in a brand-new codebase to practice a different project's full contribution flow end-to-end. This issue on `Maki-Zeninn/stellar-router` (a Rust/Soroban Stellar smart-contract project) was labeled `documentation` and `good first issue`, was unassigned, and had a precise scope — perfect for learning the repo's conventions (branch naming, Conventional Commits, squash-merge) before attempting deeper code work.
+
+I hoped to learn how this project structures contributions differently from `nous-core` — notably, that PRs here target `main` directly rather than a long-lived integration branch, and that its `CONTRIBUTING.md` centers on Rust tooling (`cargo test`/`fmt`/`clippy`).
+
+---
+
+## Understanding the Issue
+
+### Problem Description
+
+The repo's `TODO.md` had four completed `[x]` checklist items sitting **above** the file's `# TODO` heading — leftover scratch notes from a prior `router-multicall` pull request, not actual project work.
+
+### Expected Behavior
+
+`TODO.md` should open with its `# TODO` heading, immediately followed by the active "Role membership transfer between addresses (router-access)" task list.
+
+### Current Behavior
+
+Four stale completed lines preceded the top-level heading, disrupting the document's structure and making it look like the project's outstanding tasks were unclear / cleanup was incomplete.
+
+### Affected Components
+
+A single file — `TODO.md` at the repository root. No source, build, or test surface is involved; this is documentation-only.
+
+---
+
+## Reproduction Process
+
+### Environment Setup
+
+No special toolchain was needed — the change is Markdown-only. I cloned `Maki-Zeninn/stellar-router` with a clean working tree on `main`.
+
+### Steps to Reproduce
+
+1. Clone the repo and check out `main`.
+2. Open `TODO.md`.
+3. Observed result: lines 1–4 are completed `[x]` checklist items positioned above the `# TODO` heading on line 5.
+
+### Reproduction Evidence
+
+- **Commit showing reproduction:** N/A — for a "stale content" docs issue, reproduction is simply verifying the four lines exist above the heading before editing.
+- **Screenshots/logs:**
+  ```
+  - [x] Explore router-multicall contract code and existing tests (read contracts/router-multicall/src/lib.rs)
+  - [x] Add/adjust tests to verify stored batch results behavior via get_batch_result/get_batch_results
+  - [x] Fix compilation issues in tests due to Soroban client return types (Option/Vec handling)
+  - [x] Run `cargo test -p router-multicall` and ensure tests pass
+  # TODO
+  ```
+- **My findings:** The four `[x]` lines reference `router-multicall` implementation details unrelated to the active `router-access` task list that follows the heading — confirming they are stale scratch notes from a previous PR.
+
+---
+
+## Solution Approach
+
+### Analysis
+
+Root cause: prior development left throwaway checklist notes at the top of `TODO.md` and never removed them, so they ended up above the document's own heading. Nothing is logically "broken" in code — the fix is a pure structural cleanup.
+
+### Proposed Solution
+
+Delete lines 1–4 so the `# TODO` heading becomes the file's first line, leaving the active task list untouched.
+
+### Implementation Plan
+
+Using UMPIRE framework (adapted):
+
+**Understand:** `TODO.md` must open with its heading; the four preceding `[x]` lines are stale and must be removed without altering anything below the heading.
+
+**Match:** Reviewed the repo's `CONTRIBUTING.md` — branch naming `<type>/<short-description>`, Conventional Commit format `type(scope): summary`, PR from `main` with one approval, squash-merge.
+
+**Plan:**
+1. Fork the repo (none existed yet) → `saisubhash9/stellar-router`.
+2. Branch from `main`: `docs/issue-923-remove-stale-todo-checklist`.
+3. Remove lines 1–4 of `TODO.md`; verify `# TODO` is now line 1.
+4. Commit with a Conventional Commit message referencing the issue.
+5. Push to the fork; open a PR against upstream `main`.
+
+**Implement:** Branch `docs/issue-923-remove-stale-todo-checklist` — clean `1 file changed, 4 deletions(-)` diff.
+
+**Review:** Documentation-only, so `cargo test`/`fmt`/`clippy` are not applicable per `CONTRIBUTING.md`. Verified the diff removes only the four stale lines. Commit follows Conventional Commits and PR targets `main` as required.
+
+**Evaluate:** Confirm the file now opens with `# TODO` followed immediately by the active task list, with no orphaned notes.
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+
+- [x] N/A — documentation-only change; no code paths affected.
+
+### Integration Tests
+
+- [x] N/A — no build or runtime surface touched.
+
+### Manual Testing
+
+Verified `# TODO` is now the first line of `TODO.md`, the active `router-access` task list follows immediately, and the diff is exactly `1 file changed, 4 deletions(-)` — the four stale lines and nothing else.
+
+---
+
+## Implementation Notes
+
+### Week 1 Progress
+
+Reviewed the repo's `CONTRIBUTING.md`, forked it, branched `docs/issue-923-remove-stale-todo-checklist` from `main`, removed the stale checklist, committed, and opened PR #924 against upstream `main`. Since `origin` pointed at the upstream repo (no push access), I created a personal fork, added it as a separate remote, and opened the PR from `saisubhash9:docs/issue-923-...` into upstream `main`.
+
+### Code Changes
+
+- **Files modified:** `TODO.md` (4 lines removed).
+- **Key commits:** `docs(docs): remove stale scratch checklist from top of TODO.md` (`Closes #923`).
+- **Approach decisions:** Kept the change surgical — only the four stale lines removed, active task list untouched — for a trivially reviewable, easily revertible PR.
+
+---
+
+## Pull Request
+
+**PR Link:** https://github.com/Maki-Zeninn/stellar-router/pull/924
+
+**PR Description:** Removes four completed `[x]` scratch-checklist items that sat above the `# TODO` heading in `TODO.md` (leftover notes from a prior `router-multicall` PR). The `# TODO` heading is now the file's first line, followed immediately by the active "Role membership transfer between addresses (router-access)" task list. Documentation-only — no tests required. `Closes #923`.
+
+**Maintainer Feedback:**
+- 2026-07-25: PR submitted; awaiting review. Per the repo's `CONTRIBUTING.md`, it needs one approval and will be squash-merged.
+
+**Status:** Awaiting review
+
+---
+
+## Learnings & Reflections
+
+### Technical Skills Gained
+
+[To be updated after review/merge]
+
+### Challenges Overcome
+
+Adapting to a new repository's contribution model: `origin` pointed at the upstream repo, so I forked, added the fork as a separate remote, and opened the PR from my fork's branch into upstream `main`.
+
+### What I'd Do Differently Next Time
+
+[To be updated after review/merge]
+
+---
+
+## Resources Used
+
+- [stellar-router CONTRIBUTING.md](https://github.com/Maki-Zeninn/stellar-router/blob/main/CONTRIBUTING.md)
+- [Issue #923](https://github.com/Maki-Zeninn/stellar-router/issues/923)
+
 # Contribution 3: Adapter: Replicate Model Provider
 
 **Contribution Number:** 3  
