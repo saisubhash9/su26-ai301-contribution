@@ -3,7 +3,7 @@
 **Contribution Number:** 4  
 **Student:** Sai Subhash Manam  
 **Issue:** https://github.com/Maki-Zeninn/stellar-router/issues/923  
-**Status:** Phase III [Complete — PR Submitted, Awaiting Review]
+**Status:** Phase IV [Complete — Merged ✅]
 
 ---
 
@@ -115,7 +115,7 @@ Verified `# TODO` is now the first line of `TODO.md`, the active `router-access`
 
 ### Week 1 Progress
 
-Reviewed the repo's `CONTRIBUTING.md`, forked it, branched `docs/issue-923-remove-stale-todo-checklist` from `main`, removed the stale checklist, committed, and opened PR #924 against upstream `main`. Since `origin` pointed at the upstream repo (no push access), I created a personal fork, added it as a separate remote, and opened the PR from `saisubhash9:docs/issue-923-...` into upstream `main`.
+Reviewed the repo's `CONTRIBUTING.md`, forked it, branched `docs/issue-923-remove-stale-todo-checklist` from `main`, removed the stale checklist, committed, and opened PR #924 against upstream `main`. The PR was reviewed and **merged** (squash-merge) into `main`. Since `origin` pointed at the upstream repo (no push access), I created a personal fork, added it as a separate remote, and opened the PR from `saisubhash9:docs/issue-923-...` into upstream `main`.
 
 ### Code Changes
 
@@ -127,14 +127,15 @@ Reviewed the repo's `CONTRIBUTING.md`, forked it, branched `docs/issue-923-remov
 
 ## Pull Request
 
-**PR Link:** https://github.com/Maki-Zeninn/stellar-router/pull/924
+**PR Link:** https://github.com/Maki-Zeninn/stellar-router/pull/924 (merged ✅)
 
 **PR Description:** Removes four completed `[x]` scratch-checklist items that sat above the `# TODO` heading in `TODO.md` (leftover notes from a prior `router-multicall` PR). The `# TODO` heading is now the file's first line, followed immediately by the active "Role membership transfer between addresses (router-access)" task list. Documentation-only — no tests required. `Closes #923`.
 
 **Maintainer Feedback:**
-- 2026-07-25: PR submitted; awaiting review. Per the repo's `CONTRIBUTING.md`, it needs one approval and will be squash-merged.
+- 2026-07-25: PR submitted against `main`.
+- 2026-07-26: Approved and squash-merged by the maintainer.
 
-**Status:** Awaiting review
+**Status:** Merged ✅
 
 ---
 
@@ -142,15 +143,15 @@ Reviewed the repo's `CONTRIBUTING.md`, forked it, branched `docs/issue-923-remov
 
 ### Technical Skills Gained
 
-[To be updated after review/merge]
+Learned how to adapt to a Rust/Soroban project's contribution model quickly by reading its `CONTRIBUTING.md` first — branch naming, Conventional Commits, and squash-merge — and confirmed that documentation-only PRs correctly skip the `cargo test`/`fmt`/`clippy` gates that apply to code changes.
 
 ### Challenges Overcome
 
-Adapting to a new repository's contribution model: `origin` pointed at the upstream repo, so I forked, added the fork as a separate remote, and opened the PR from my fork's branch into upstream `main`.
+Adapting to a new repository's contribution model: `origin` pointed at the upstream repo (no push access), so I forked, added the fork as a separate remote, and opened the PR from my fork's branch into upstream `main`.
 
 ### What I'd Do Differently Next Time
 
-[To be updated after review/merge]
+Nothing significant for a change this small — the surgical, single-file diff made review and merge fast. I'd keep this same "read CONTRIBUTING first, keep the diff minimal" approach for future good-first-issue contributions.
 
 ---
 
@@ -158,6 +159,7 @@ Adapting to a new repository's contribution model: `origin` pointed at the upstr
 
 - [stellar-router CONTRIBUTING.md](https://github.com/Maki-Zeninn/stellar-router/blob/main/CONTRIBUTING.md)
 - [Issue #923](https://github.com/Maki-Zeninn/stellar-router/issues/923)
+- [Pull Request #924](https://github.com/Maki-Zeninn/stellar-router/pull/924)
 
 # Contribution 3: Adapter: Replicate Model Provider
 
